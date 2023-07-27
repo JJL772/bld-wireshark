@@ -82,10 +82,10 @@ static int bld_dissect(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree, void
 	}
 
     /* Handle complementary packets coming in now */
-    int compIdx = 0;
+    int compIdx = 1;
     while (offset < length) {
         char treeName[128];
-        snprintf(treeName, sizeof(treeName), "Complementary chunk %d", compIdx++);
+        snprintf(treeName, sizeof(treeName), "Event %d", compIdx++);
         /* Mark this as a complementary chunk */
         proto_tree* ctree = 
         #if WS_OLD_API
