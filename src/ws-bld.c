@@ -7,20 +7,22 @@
 #include <epan/packet.h>
 #include <epan/epan_dissect.h>
 
-#if WIRESHARK_VERSION_MAJOR < 2 || (WIRESHARK_VERSION_MAJOR == 2 && WIRESHARK_VERSION_MINOR < 5)
-#define WS_OLD_API 1
-#else
-#define WS_OLD_API 0
+/* Compat with <4.0 */
+#ifndef WIRESHARK_VERSION_MAJOR
+#   include <wireshark/config.h>
+#   define WIRESHARK_VERSION_MAJOR VERSION_MAJOR
+#   define WIRESHARK_VERSION_MINOR VERSION_MINOR
 #endif
 
-#if WS_OLD_API
-#include <epan/plugins.h>
+#if WIRESHARK_VERSION_MAJOR < 2 || (WIRESHARK_VERSION_MAJOR == 2 && WIRESHARK_VERSION_MINOR < 1)
+#   define WS_OLD_API 1
+#else
+#   define WS_OLD_API 0
 #endif
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
 
 #include "bld-proto.h"
 
@@ -49,6 +51,10 @@ static int hf_bld_data[NUM_BLD_CHANNELS] = {-1};
 static int hf_bld_comp_ts = -1;
 static int hf_bld_comp_pulseid = -1;
 static int hf_bld_comp_sevr = -1;
+
+#if WS_OLD_API
+#   define create_dissector_handle new_create_dissector_handle
+#endif
 
 static int bld_dissect(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree, void* data) {
     int offset = 0;
