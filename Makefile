@@ -2,7 +2,7 @@
 WIRESHARK_CFLAGS=$(shell pkg-config wireshark --cflags)
 WIRESHARK_LIBS=$(shell pkg-config wireshark --cflags --libs)
 
-CFLAGS=$(WIRESHARK_CFLAGS) -Wall -Werror -O2 -std=gnu99 -fPIC
+CFLAGS=$(WIRESHARK_CFLAGS) -Wall -Werror -O2 -std=c99 -fPIC
 LDFLAGS=$(WIRESHARK_LIBS) -Wl,--no-undefined
 
 WIRESHARK_VER=4.0
