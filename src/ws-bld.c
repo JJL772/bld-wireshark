@@ -6,6 +6,7 @@
 
 #include <epan/packet.h>
 #include <epan/epan_dissect.h>
+#include <epan/plugin_if.h>
 
 /* Compat with <4.0 */
 #ifndef WIRESHARK_VERSION_MAJOR
@@ -127,7 +128,7 @@ static hf_register_info bld_fields[] = {
         &hf_bld_ts,
         {
             "timestamp",
-            "ts",
+            "bld.timestamp",
             FT_UINT64,
             BASE_HEX,
             NULL,
@@ -139,7 +140,7 @@ static hf_register_info bld_fields[] = {
         &hf_bld_pulseid,
         {
             "pulse_id",
-            "pid",
+            "bld.pulse_id",
             FT_UINT64,
             BASE_HEX,
             NULL,
@@ -151,7 +152,7 @@ static hf_register_info bld_fields[] = {
         &hf_bld_version,
         {
             "version",
-            "ver",
+            "bld.version",
             FT_UINT32,
             BASE_HEX,
             NULL,
@@ -162,7 +163,7 @@ static hf_register_info bld_fields[] = {
     {
         &hf_bld_sevr,
         {
-            "severity_mask",
+            "bld.severity_mask",
             "sevr",
             FT_UINT64,
             BASE_HEX,
@@ -178,7 +179,7 @@ static hf_register_info bld_comp_fields[] = {
         &hf_bld_comp_ts,
         {
             "timestamp delta",
-            "ts_delta",
+            "bld.ev.timestamp_delta",
             FT_UINT32,
             BASE_HEX,
             NULL,
@@ -190,7 +191,7 @@ static hf_register_info bld_comp_fields[] = {
         &hf_bld_comp_pulseid,
         {
             "pulse ID delta",
-            "pid_delta",
+            "bld.ev.pulse_id_delta",
             FT_UINT32,
             BASE_HEX,
             NULL,
@@ -202,7 +203,7 @@ static hf_register_info bld_comp_fields[] = {
         &hf_bld_comp_sevr,
         {
             "severity mask",
-            "sevr",
+            "bld.ev.severity_mask",
             FT_UINT64,
             BASE_HEX,
             NULL,
@@ -228,14 +229,17 @@ void plugin_register_proto() {
     /* Generate list of data header fields */
     static hf_register_info bld_hf_data[NUM_BLD_CHANNELS];
     static char bld_field_names[32][NUM_BLD_CHANNELS];
+    static char bld_field_abbv[32][NUM_BLD_CHANNELS];
+    
     for (int i = 0; i < NUM_BLD_CHANNELS; ++i) {
         snprintf(bld_field_names[i], sizeof(bld_field_names[i]), "signal%d", i);
+        snprintf(bld_field_abbv[i], sizeof(bld_field_abbv[i]), "data.signal%d", i);
 
         hf_register_info m = {
             &hf_bld_data[i],
             {
                 bld_field_names[i],
-                bld_field_names[i],
+                bld_field_abbv[i],
                 FT_UINT32,
                 BASE_HEX,
                 NULL,
