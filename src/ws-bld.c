@@ -216,11 +216,11 @@ static hf_register_info bld_comp_fields[] = {
 /* Exported for old versions of wireshark that directly call this for us */
 EXPORT_SYM void plugin_reg_handoff() {
     dissector_handle_t handle = create_dissector_handle(bld_dissect, bld_proto);
-    dissector_add_uint("udp.port", DEFAULT_BLD_PORT, handle);
+    dissector_add_uint_with_preference("udp.port", DEFAULT_BLD_PORT, handle);
 }
 
 void plugin_register_proto() {
-    bld_proto = proto_register_protocol("SLAC BLD", "bld", "bld");
+    bld_proto = proto_register_protocol("SLAC BLD", "BLD", "bld");
 
     static int* ett[] = {
         &ett_bld,
