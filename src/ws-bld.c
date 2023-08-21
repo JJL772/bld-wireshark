@@ -6,7 +6,6 @@
 
 #include <epan/packet.h>
 #include <epan/epan_dissect.h>
-#include <epan/plugin_if.h>
 
 /* Compat with <4.0 */
 #ifndef WIRESHARK_VERSION_MAJOR
@@ -19,6 +18,10 @@
 #   define WS_OLD_API 1
 #else
 #   define WS_OLD_API 0
+#endif
+
+#if !WS_OLD_API
+#   include <epan/plugin_if.h>
 #endif
 
 #include <stdlib.h>
@@ -63,9 +66,11 @@ static bld_format_t bld_channel_formats[NUM_BLD_CHANNELS];
 #   define create_dissector_handle new_create_dissector_handle
 #endif
 
+#if !WS_OLD_API /* Only needed for toolbar callbacks */
 static int clamp(int val, int l, int h) {
     return val < l ? l : (val > h ? h : val);
 }
+#endif // !WS_OLD_API
 
 static int get_bld_hf_data(int channel) {
     return bld_channel_formats[channel] == BLD_UINT32 ? hf_bld_data[channel * 2] : hf_bld_data[channel * 2 + 1];
@@ -239,11 +244,17 @@ static hf_register_info bld_comp_fields[] = {
 /* Exported for old versions of wireshark that directly call this for us */
 EXPORT_SYM void plugin_reg_handoff() {
     dissector_handle_t handle = create_dissector_handle(bld_dissect, bld_proto);
+#if WS_OLD_API
+    dissector_add_uint("udp.port", DEFAULT_BLD_PORT, handle);
+#else
     dissector_add_uint_with_preference("udp.port", DEFAULT_BLD_PORT, handle);
+#endif // WS_OLD_API
 }
 
+#if !WS_OLD_API
 static void toolbar_channels_changed_callback(gpointer toolbar_item, gpointer item_data, gpointer user_data);
 static void toolbar_channel_count_changed_callback(gpointer toolbar_item, gpointer item_data, gpointer user_data);
+#endif // !WS_OLD_API
 
 void plugin_register_proto() {
     bld_proto = proto_register_protocol("SLAC BLD", "BLD", "bld");
@@ -299,6 +310,7 @@ void plugin_register_proto() {
     proto_register_field_array(bld_proto, bld_hf_data, array_length(bld_hf_data));
     proto_register_field_array(bld_proto, bld_comp_fields, array_length(bld_comp_fields));
 
+#if !WS_OLD_API
     /* Add BLD toolbar for changing channel formats, count, etc */
     ext_toolbar_t* toolbar = ext_toolbar_register_toolbar("BLD Protocol");
     ext_toolbar_add_entry(toolbar, EXT_TOOLBAR_STRING, "Channel Formats", "", "Comma separated list defining channel formats. e.g. f, u, f means channel 0 will be float, 1 will be int, and 2 will be float",
@@ -317,8 +329,10 @@ void plugin_register_proto() {
     }
     
     ext_toolbar_add_entry(toolbar, EXT_TOOLBAR_SELECTOR, "Channel Count", "-1", "Number of channels in the packet", FALSE, vals, FALSE, NULL, toolbar_channel_count_changed_callback, NULL);
+#endif // !WS_OLD_API
 }
 
+#if !WS_OLD_API
 static void toolbar_channels_changed_callback(gpointer toolbar_item, gpointer item_data, gpointer user_data) {
     gchar* str = (gchar*)item_data;
 
@@ -347,6 +361,7 @@ static void toolbar_channels_changed_callback(gpointer toolbar_item, gpointer it
 static void toolbar_channel_count_changed_callback(gpointer toolbar_item, gpointer item_data, gpointer user_data) {
     bld_num_channels = clamp(strtod((gchar*)item_data, NULL), -1, NUM_BLD_CHANNELS);
 }
+#endif // !WS_OLD_API
 
 /* Entry point-- called by wireshark on load */
 EXPORT_SYM void plugin_register() {
