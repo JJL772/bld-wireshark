@@ -42,8 +42,8 @@
 
 EXPORT_SYM const gchar plugin_version[] = PLUGIN_VERSION;
 EXPORT_SYM const gchar version[] = PLUGIN_VERSION; /* For old API */
-EXPORT_SYM int plugin_want_major = 4;
-EXPORT_SYM int plugin_want_minor = 0;
+EXPORT_SYM int plugin_want_major = WIRESHARK_VERSION_MAJOR;
+EXPORT_SYM int plugin_want_minor = WIRESHARK_VERSION_MINOR;
 
 static uint32_t min(uint32_t a, uint32_t b) {
     return a < b ? a : b;
